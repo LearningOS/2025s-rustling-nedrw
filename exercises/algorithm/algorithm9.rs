@@ -2,10 +2,10 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
+use std::fmt::Debug;
 
 pub struct Heap<T>
 where
@@ -23,7 +23,7 @@ where
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
-            items: vec![T::default()],
+            items: vec![],
             comparator,
         }
     }
@@ -37,7 +37,15 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.count += 1;
+        self.items.push(value);
+        self.items.swap(0, self.count - 1);
+        for count in (0..self.count).rev() {
+            let pid = self.parent_idx(count);
+            if (self.comparator)(&self.items[count], &self.items[pid]) {
+                self.items.swap(pid, count);
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -79,12 +87,22 @@ where
 
 impl<T> Iterator for Heap<T>
 where
-    T: Default,
+    T: Default + Debug,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
+        if self.count > 0 {
+            self.items.swap(0, self.count - 1);
+            self.count -= 1;
+            for count in (1..self.count).rev() {
+                let pid = self.parent_idx(count);
+                if (self.comparator)(&self.items[count], &self.items[pid]) {
+                    self.items.swap(pid, count);
+                }
+            }
+            return self.items.pop();
+        }
 		None
     }
 }
